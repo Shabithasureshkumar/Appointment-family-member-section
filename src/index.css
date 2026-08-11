@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+.font-manrope {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+}
+
+/* Ambient glow effects matching the Figma spec */
+.glow-left {
+  background: radial-gradient(circle, rgba(176, 144, 242, 0.3) 0%, rgba(92, 36, 255, 0.15) 60%, rgba(255, 255, 255, 0) 100%);
+  filter: blur(90px);
+}
+
+.glow-right {
+  background: radial-gradient(circle, rgba(176, 144, 242, 0.3) 0%, rgba(92, 36, 255, 0.15) 60%, rgba(255, 255, 255, 0) 100%);
+  filter: blur(90px);
+}
+
+/* Concentric rings around selected profile avatar */
+.selected-ring-container {
+  position: relative;
+}
+
+.selected-ring-container::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(107, 56, 212, 0.4);
+  animation: spin-slow 20s linear infinite;
+}
+
+.selected-ring-container::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(107, 56, 212, 0.25);
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
