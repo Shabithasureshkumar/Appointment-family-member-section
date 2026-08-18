@@ -68,6 +68,8 @@ export function Avatar({
       height={size}
       loading={loading}
       decoding="async"
+      // Avatars are fetched from a third party; don't hand it the page URL.
+      referrerPolicy="no-referrer"
       onError={() => setHasFailed(true)}
       className={cn('h-full w-full object-cover', className)}
     />

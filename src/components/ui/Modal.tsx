@@ -100,15 +100,17 @@ export function Modal({
 
       const panel = panelRef.current;
       const focusables = focusableWithin(panel);
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
 
-      if (focusables.length === 0) {
+      // Nothing focusable inside: hold focus on the panel itself rather than
+      // letting Tab escape to the page behind the dialog.
+      if (!first || !last) {
         event.preventDefault();
         panel?.focus();
         return;
       }
 
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
       const active = document.activeElement;
       const insidePanel = panel?.contains(active) ?? false;
 

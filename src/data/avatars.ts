@@ -39,4 +39,8 @@ export const AVATAR_OPTIONS: readonly AvatarOption[] = [
   },
 ];
 
-export const DEFAULT_AVATAR = AVATAR_OPTIONS[0];
+/**
+ * The avatar preselected by the Add Member form. Falls back to no image (the
+ * initials placeholder) if the option list is ever emptied.
+ */
+export const DEFAULT_AVATAR_URL: string | undefined = AVATAR_OPTIONS[0]?.url;

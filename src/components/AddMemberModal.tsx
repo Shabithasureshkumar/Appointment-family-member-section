@@ -2,7 +2,7 @@ import { useId, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Image as ImageIcon, UserPlus } from 'lucide-react';
 import { cn } from '../lib/cn';
-import { AVATAR_OPTIONS, DEFAULT_AVATAR } from '../data/avatars';
+import { AVATAR_OPTIONS, DEFAULT_AVATAR_URL } from '../data/avatars';
 import { ADDABLE_RELATIONS, DEFAULT_ADD_RELATION } from '../constants/relations';
 import type { AddMemberResult } from '../hooks/useFamilyMembers';
 import type { NewMemberDraft, Relation } from '../types';
@@ -27,7 +27,7 @@ const AVATAR_INTRINSIC_SIZE = 48;
 export function AddMemberModal({ onClose, onAdd }: AddMemberModalProps) {
   const [name, setName] = useState('');
   const [relation, setRelation] = useState<Relation>(DEFAULT_ADD_RELATION);
-  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR.url);
+  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR_URL);
   const [error, setError] = useState<string | null>(null);
 
   const nameInputRef = useRef<HTMLInputElement>(null);

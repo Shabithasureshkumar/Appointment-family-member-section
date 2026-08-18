@@ -6,7 +6,6 @@ const DISMISS_AFTER_MS = 4000;
 export interface UseNotification {
   notification: AppNotification | null;
   notify: (message: string, type?: NotificationType) => void;
-  dismiss: () => void;
 }
 
 /**
@@ -27,11 +26,6 @@ export function useNotification(): UseNotification {
     }
   }, []);
 
-  const dismiss = useCallback(() => {
-    clearTimer();
-    setNotification(null);
-  }, [clearTimer]);
-
   const notify = useCallback(
     (message: string, type: NotificationType = 'success') => {
       clearTimer();
@@ -46,5 +40,5 @@ export function useNotification(): UseNotification {
 
   useEffect(() => clearTimer, [clearTimer]);
 
-  return { notification, notify, dismiss };
+  return { notification, notify };
 }

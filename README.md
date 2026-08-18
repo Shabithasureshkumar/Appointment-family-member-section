@@ -20,6 +20,7 @@ npm run dev
 | `npm run dev` | Vite dev server on http://localhost:5173 |
 | `npm run build` | Type-checks with `tsc -b`, then builds to `dist/` |
 | `npm run lint` | Runs **oxlint** (this project does not use ESLint — there is no `eslint.config.js`) |
+| `npm run typecheck` | `tsc -b` on its own, without a full build |
 | `npm run preview` | Serves the production build locally |
 
 ## Project structure
@@ -28,6 +29,7 @@ npm run dev
 src/
   components/
     ui/              Reusable primitives: Button, Avatar, Pill, Modal, Input, Container
+    ErrorBoundary.tsx  Last-resort guard against a blank page
     *.tsx            Screen-level components
   constants/
     relations.ts     RELATIONS array + the Relation union derived from it
@@ -41,6 +43,7 @@ src/
     useNotification.ts   Single-slot toast with a managed timer
   lib/               cn (class join), createId
   types.ts           Domain types
+  main.tsx           Mounts the app inside an ErrorBoundary
 ```
 
 ### Data layer
@@ -75,6 +78,15 @@ behind a state selector (`disabled:`, `enabled:`) that raises specificity.
 **Dialogs are rendered only while open.** `Modal` has no `isOpen` prop; the
 parent conditionally renders it. Unmounting on close is what guarantees a form
 starts from a clean draft.
+
+## Strictness
+
+TypeScript runs with `strict` and `noUncheckedIndexedAccess`, so indexing an
+array yields `T | undefined` and must be narrowed before use.
+
+oxlint runs the `correctness`, `suspicious` and `perf` categories as errors.
+`react/react-in-jsx-scope` is disabled on purpose: it does not apply under the
+automatic JSX runtime (`"jsx": "react-jsx"`).
 
 ## Known limitations
 

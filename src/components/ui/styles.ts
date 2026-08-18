@@ -17,6 +17,3 @@ export const FOCUS_RING =
  */
 export const TRANSITION =
   'transition-[transform,opacity,color,background-color,border-color,box-shadow] duration-300';
-
-export const TRANSITION_FAST =
-  'transition-[transform,opacity,color,background-color,border-color,box-shadow] duration-200';

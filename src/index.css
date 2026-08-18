@@ -99,8 +99,22 @@
   }
 }
 
+/*
+ * Honour a reduced-motion preference across the whole app, not just the spinning
+ * selection ring. Durations are collapsed rather than removed so that
+ * transitionend/animationend listeners still fire.
+ */
 @media (prefers-reduced-motion: reduce) {
   .selected-ring-container::before {
     animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
