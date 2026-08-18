@@ -5,180 +5,163 @@ import { PageIntro } from './components/PageIntro';
 import { FamilyMemberCard } from './components/FamilyMemberCard';
 import { AddMemberCard } from './components/AddMemberCard';
 import { AddMemberModal } from './components/AddMemberModal';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { ActionButtons } from './components/ActionButtons';
 import { PrivacyMessage } from './components/PrivacyMessage';
-import type { FamilyMember } from './types';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
-
-const INITIAL_MEMBERS: FamilyMember[] = [
-  {
-    id: '1',
-    name: 'David Brock',
-    relation: 'SELF',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: '2',
-    name: 'Sarah Brock',
-    relation: 'MOTHER',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: '3',
-    name: 'Michael Brock',
-    relation: 'FATHER',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: '4',
-    name: 'Emma Brock',
-    relation: 'DAUGHTER',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-  },
-];
+import { EmptyState } from './components/EmptyState';
+import { Toast } from './components/Toast';
+import { Container } from './components/ui/Container';
+import { useFamilyMembers } from './hooks/useFamilyMembers';
+import { useNotification } from './hooks/useNotification';
+import { DEFAULT_NAV_TAB } from './data/navigation';
+import type { FamilyMember, NavItem, NewMemberDraft } from './types';
 
 export function App() {
-  const [members, setMembers] = useState<FamilyMember[]>(INITIAL_MEMBERS);
-  const [selectedId, setSelectedId] = useState<string>('1');
-  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<{
-    type: 'success' | 'info' | 'warning';
-    message: string;
-  } | null>(null);
+  const { members, selectedId, selectedMember, selectMember, addMember, removeMember } =
+    useFamilyMembers();
+  const { notification, notify } = useNotification();
 
-  const selectedMember = members.find((m) => m.id === selectedId) || members[0];
+  const [activeTab, setActiveTab] = useState<NavItem>(DEFAULT_NAV_TAB);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [memberPendingRemoval, setMemberPendingRemoval] = useState<FamilyMember | null>(null);
 
-  const showNotification = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 4000);
-  };
-
-  const handleSelectMember = (id: string) => {
-    setSelectedId(id);
-  };
+  const isLastMember = members.length <= 1;
 
   const handleConfirmSelection = () => {
     if (!selectedMember) return;
-    showNotification(
+    notify(
       `Selection confirmed! Medical assistance requested for ${selectedMember.name} (${selectedMember.relation}).`,
-      'success'
+      'success',
     );
   };
 
-  const handleRemoveMember = () => {
-    if (!selectedMember) return;
-    if (members.length <= 1) {
-      showNotification('Cannot remove the last remaining family member.', 'warning');
-      return;
+  const handleAddMember = (draft: NewMemberDraft) => {
+    const result = addMember(draft);
+    if (result.ok) {
+      notify(`${result.member.name} added successfully!`, 'success');
     }
-
-    const removedName = selectedMember.name;
-    const updatedMembers = members.filter((m) => m.id !== selectedId);
-    setMembers(updatedMembers);
-
-    // Select the first remaining member automatically
-    if (updatedMembers.length > 0) {
-      setSelectedId(updatedMembers[0].id);
-    }
-
-    showNotification(`${removedName} has been removed from your family profile.`, 'info');
+    // A failure is surfaced inside the form, which keeps the dialog open.
+    return result;
   };
 
-  const handleAddMember = (newMember: FamilyMember) => {
-    const updatedMembers = [...members, newMember];
-    setMembers(updatedMembers);
-    setSelectedId(newMember.id);
-    showNotification(`${newMember.name} added successfully!`, 'success');
+  const handleRequestRemoval = () => {
+    if (!selectedMember) return;
+    if (isLastMember) {
+      notify('Cannot remove the last remaining family member.', 'warning');
+      return;
+    }
+    setMemberPendingRemoval(selectedMember);
+  };
+
+  const handleConfirmRemoval = () => {
+    if (!memberPendingRemoval) return;
+    const result = removeMember(memberPendingRemoval.id);
+    setMemberPendingRemoval(null);
+
+    if (result.ok) {
+      notify(`${result.removed.name} has been removed from your family profile.`, 'info');
+    } else {
+      notify(result.error, 'warning');
+    }
   };
 
   return (
-    <div className="relative min-h-screen bg-white overflow-x-hidden flex flex-col justify-between selection:bg-purple-100 selection:text-purple-900">
-      {/* Background Soft Purple Radial Glows */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-20 -left-20 w-[450px] h-[450px] sm:w-[600px] sm:h-[600px] glow-left rounded-full opacity-40 z-0"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-20 -right-20 w-[450px] h-[450px] sm:w-[600px] sm:h-[600px] glow-right rounded-full opacity-40 z-0"
-      />
+    <div className="relative flex min-h-screen flex-col justify-between bg-white selection:bg-purple-100 selection:text-purple-900">
+      {/*
+        Background Soft Purple Radial Glows.
+        The clipping lives on this decorative layer alone. The page root is left
+        unclipped on purpose, so real content overflow shows up as a scrollbar
+        during development instead of being silently hidden.
+      */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="glow-left absolute -top-20 -left-20 h-[450px] w-[450px] rounded-full opacity-40 sm:h-[600px] sm:w-[600px]" />
+        <div className="glow-right absolute -right-20 -bottom-20 h-[450px] w-[450px] rounded-full opacity-40 sm:h-[600px] sm:w-[600px]" />
+      </div>
 
-      {/* Toast Notification Banner */}
-      {notification && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 animate-bounce-short">
-          <div
-            className={`flex items-center gap-3 px-6 py-3.5 rounded-full shadow-2xl backdrop-blur-md border ${
-              notification.type === 'success'
-                ? 'bg-emerald-900/90 text-white border-emerald-700/50'
-                : notification.type === 'warning'
-                ? 'bg-amber-900/90 text-white border-amber-700/50'
-                : 'bg-purple-900/90 text-white border-purple-700/50'
-            }`}
-          >
-            {notification.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-            )}
-            <span className="text-sm font-medium">{notification.message}</span>
-          </div>
-        </div>
-      )}
+      <Toast notification={notification} />
 
       {/* Main Page Layout Container */}
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex min-h-screen flex-col">
         {/* 1. Top Navigation */}
-        <TopNavigation />
+        <TopNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Main Content Area */}
-        <main className="flex-1 flex flex-col justify-center items-center px-4 py-6 md:py-10 max-w-[1253px] w-full mx-auto">
-          {/* Main Selection Wrapper Card with Glassmorphism */}
-          <div className="w-full bg-white/40 backdrop-blur-[36px] rounded-[29px] p-4 sm:p-8 md:p-10 flex flex-col items-center border border-white/60 shadow-2xs transition-all">
-            {/* 2. Medical Logo */}
-            <MedicalLogo />
+        {/*
+          Main Content Area. The content sits directly on the page — there is no
+          enclosing rounded panel — so the ambient glow reads as page background
+          rather than as a card sitting on top of it.
+        */}
+        <Container
+          as="main"
+          className="flex flex-1 flex-col items-center py-10 md:py-14 lg:py-16"
+        >
+          {/* 2. Medical Logo */}
+          <MedicalLogo />
 
-            {/* 3. Main Heading & Subtitle */}
-            <PageIntro />
+          {/* 3. Main Heading & Subtitle */}
+          <PageIntro />
 
-            {/* 4. Family Member Cards Row */}
-            <div className="w-full max-w-[1010px] mx-auto my-6 sm:my-8">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 justify-items-center items-center">
+          {/* 4. Family Member Cards Row */}
+          <div className="mx-auto mt-12 w-full max-w-[940px] md:mt-14">
+            {members.length === 0 ? (
+              <EmptyState onAddMember={() => setIsAddModalOpen(true)} />
+            ) : (
+              /*
+                auto-fit tracks rather than fixed column counts: the column count
+                follows the available width continuously, so there is no abrupt
+                jump at a breakpoint and no column ever grows far wider than the
+                card inside it. The three minimums are tuned to match the approved
+                design — 1 column at 320px, 2 from 360px, 3 from 640px, 4 in the
+                tablet range and exactly 5 from 900px up, never 6.
+              */
+              <div
+                role="group"
+                aria-label="Family members"
+                className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] items-start justify-items-center gap-4 sm:gap-6 lg:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] lg:gap-10"
+              >
                 {members.map((member) => (
                   <FamilyMemberCard
                     key={member.id}
                     member={member}
                     isSelected={member.id === selectedId}
-                    onSelect={handleSelectMember}
+                    onSelect={selectMember}
                   />
                 ))}
 
                 {/* Add Member Card */}
                 <AddMemberCard onAddMember={() => setIsAddModalOpen(true)} />
               </div>
-            </div>
-
-            {/* 5. Action Buttons (Confirm / Remove) */}
-            <ActionButtons
-              selectedMemberName={selectedMember ? selectedMember.name : ''}
-              onConfirm={handleConfirmSelection}
-              onRemove={handleRemoveMember}
-              disableRemove={members.length <= 1}
-            />
-
-            {/* 6. Privacy Message */}
-            <PrivacyMessage />
+            )}
           </div>
-        </main>
+
+          {/* 5. Action Buttons (Confirm / Remove) */}
+          <div className="mt-12 w-full md:mt-14">
+            <ActionButtons
+              selectedMemberName={selectedMember ? selectedMember.name : null}
+              onConfirm={handleConfirmSelection}
+              onRemove={handleRequestRemoval}
+              disableRemove={isLastMember}
+            />
+          </div>
+
+          {/* 6. Privacy Message */}
+          <PrivacyMessage />
+        </Container>
       </div>
 
-      {/* Interactive Add Member Modal */}
-      <AddMemberModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddMember}
-      />
+      {/* Dialogs are mounted only while open so their state starts clean each time. */}
+      {isAddModalOpen ? (
+        <AddMemberModal onClose={() => setIsAddModalOpen(false)} onAdd={handleAddMember} />
+      ) : null}
+
+      {memberPendingRemoval ? (
+        <ConfirmDialog
+          title={`Remove ${memberPendingRemoval.name}?`}
+          description={`This will remove ${memberPendingRemoval.name} (${memberPendingRemoval.relation}) from your family members.`}
+          confirmLabel="Remove Member"
+          onConfirm={handleConfirmRemoval}
+          onCancel={() => setMemberPendingRemoval(null)}
+        />
+      ) : null}
     </div>
   );
 }

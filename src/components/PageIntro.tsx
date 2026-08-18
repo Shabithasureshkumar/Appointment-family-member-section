@@ -1,17 +1,23 @@
-import React from 'react';
-
-export const PageIntro: React.FC = () => {
+/**
+ * Hero heading and subtitle.
+ *
+ * The heading's max-width is set so the full sentence stays on one line at
+ * desktop; the subtitle is capped narrower so it breaks into the two balanced
+ * lines the design shows.
+ */
+export function PageIntro() {
   return (
-    <div className="flex flex-col items-center text-center max-w-[1157px] mx-auto pt-2 pb-6 px-4">
+    <div className="mt-10 flex flex-col items-center text-center md:mt-12">
       {/* Heading 1 */}
-      <h1 className="text-2xl sm:text-3xl md:text-[33px] font-bold text-[#000000] tracking-[-0.66px] leading-tight md:leading-[39.64px] max-w-[821px]">
+      <h1 className="max-w-[880px] text-2xl leading-tight font-bold tracking-[-0.66px] text-black sm:text-3xl md:text-[33px] md:leading-[39.64px]">
         Which Family Member Requires Medical Assistance?
       </h1>
 
       {/* Description / Subtitle */}
-      <p className="mt-3 text-sm sm:text-base md:text-[18.35px] font-normal text-[#494551] leading-relaxed md:leading-[27.53px] max-w-[530px]">
-        Choose the person who needs medical assistance today. We ensure all personal health data remains strictly private.
+      <p className="mt-5 max-w-[560px] text-sm leading-relaxed font-normal text-ink-soft sm:text-base md:mt-6 md:text-[18.35px] md:leading-[27.53px]">
+        Choose the person who needs medical assistance today. We ensure all personal health data
+        remains strictly private.
       </p>
     </div>
   );
-};
+}

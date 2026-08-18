@@ -1,149 +1,189 @@
-import React, { useState } from 'react';
-import { X, UserPlus, Image as ImageIcon } from 'lucide-react';
-import type { FamilyMember } from '../types';
+import { useId, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Image as ImageIcon, UserPlus } from 'lucide-react';
+import { cn } from '../lib/cn';
+import { AVATAR_OPTIONS, DEFAULT_AVATAR } from '../data/avatars';
+import { ADDABLE_RELATIONS, DEFAULT_ADD_RELATION } from '../constants/relations';
+import type { AddMemberResult } from '../hooks/useFamilyMembers';
+import type { NewMemberDraft, Relation } from '../types';
+import { Avatar } from './ui/Avatar';
+import { Button } from './ui/Button';
+import { Field, Select, TextInput } from './ui/Input';
+import { Modal } from './ui/Modal';
+import { FOCUS_RING } from './ui/styles';
 
-interface AddMemberModalProps {
-  isOpen: boolean;
+export interface AddMemberModalProps {
   onClose: () => void;
-  onAdd: (newMember: FamilyMember) => void;
+  /** Returns a result so duplicate/invalid names can be surfaced in the form. */
+  onAdd: (draft: NewMemberDraft) => AddMemberResult;
 }
 
-const AVATAR_OPTIONS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-];
+const AVATAR_INTRINSIC_SIZE = 48;
 
-export const AddMemberModal: React.FC<AddMemberModalProps> = ({
-  isOpen,
-  onClose,
-  onAdd,
-}) => {
+/**
+ * Render only while the dialog should be open. Unmounting on close is what makes
+ * the next open start from a clean draft — name, relation and avatar all reset.
+ */
+export function AddMemberModal({ onClose, onAdd }: AddMemberModalProps) {
   const [name, setName] = useState('');
-  const [relation, setRelation] = useState('SON');
-  const [selectedImage, setSelectedImage] = useState(AVATAR_OPTIONS[0]);
+  const [relation, setRelation] = useState<Relation>(DEFAULT_ADD_RELATION);
+  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR.url);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const nameId = useId();
+  const relationId = useId();
+  const errorId = useId();
+  const avatarLabelId = useId();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
+  const trimmedName = name.trim();
+  const canSubmit = trimmedName.length > 0;
 
-    const newMember: FamilyMember = {
-      id: `member-${Date.now()}`,
-      name: name.trim(),
-      relation: relation.toUpperCase(),
-      image: selectedImage,
-    };
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-    onAdd(newMember);
-    setName('');
+    // Kept even though the submit button is disabled without a name: the guard
+    // must not depend on the button's state.
+    if (!trimmedName) {
+      setError('Please enter a valid name.');
+      nameInputRef.current?.focus();
+      return;
+    }
+
+    const result = onAdd({ name: trimmedName, relation, imageUrl: avatarUrl });
+
+    if (!result.ok) {
+      setError(result.error);
+      nameInputRef.current?.focus();
+      return;
+    }
+
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-purple-100 relative">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="Close modal"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <Modal
+      title="Add Family Member"
+      description="Include a new member for medical assistance"
+      onClose={onClose}
+      initialFocusRef={nameInputRef}
+      icon={
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 text-brand">
+          <UserPlus className="h-5 w-5" aria-hidden="true" />
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        {/* Name Field */}
+        <Field htmlFor={nameId} label="Full Name" error={error} errorId={errorId}>
+          <TextInput
+            id={nameId}
+            name="memberName"
+            ref={nameInputRef}
+            placeholder="e.g. Lucas Brock"
+            value={name}
+            autoComplete="off"
+            // `required` for the announcement; the form is `noValidate` because
+            // native validation accepts whitespace-only input as a name.
+            required
+            invalid={Boolean(error)}
+            aria-describedby={error ? errorId : undefined}
+            onChange={(event) => {
+              const value = event.target.value;
+              setName(value);
+              // Whitespace-only input satisfies `required` but is not a name, so
+              // say so immediately rather than leaving a disabled button
+              // unexplained.
+              setError(value.length > 0 && !value.trim() ? 'Please enter a valid name.' : null);
+            }}
+            onBlur={(event) => {
+              const value = event.target.value;
+              if (value.length > 0 && !value.trim()) {
+                setError('Please enter a valid name.');
+              }
+            }}
+          />
+        </Field>
 
-        {/* Modal Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#6B38D4]">
-            <UserPlus className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-gray-900">Add Family Member</h3>
-            <p className="text-xs text-gray-500">Include a new member for medical assistance</p>
+        {/* Relation Field */}
+        <Field htmlFor={relationId} label="Relationship">
+          <Select
+            id={relationId}
+            name="memberRelation"
+            value={relation}
+            onChange={(event) => setRelation(event.target.value as Relation)}
+          >
+            {ADDABLE_RELATIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </Select>
+        </Field>
+
+        {/* Avatar Selection */}
+        <div>
+          <p
+            id={avatarLabelId}
+            className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-700 uppercase"
+          >
+            <ImageIcon className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+            <span>Select Profile Avatar</span>
+          </p>
+          <div
+            role="radiogroup"
+            aria-labelledby={avatarLabelId}
+            className="flex items-center gap-3 overflow-x-auto py-1"
+          >
+            {AVATAR_OPTIONS.map((option) => {
+              const isSelected = avatarUrl === option.url;
+              return (
+                <button
+                  type="button"
+                  key={option.id}
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={option.label}
+                  onClick={() => setAvatarUrl(option.url)}
+                  className={cn(
+                    'relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-full border-2 transition-[transform,opacity,border-color,box-shadow]',
+                    FOCUS_RING,
+                    isSelected
+                      ? 'scale-110 border-brand shadow-sm'
+                      : 'border-transparent opacity-60 hover:opacity-100',
+                  )}
+                >
+                  <Avatar
+                    src={option.url}
+                    name={option.label}
+                    size={AVATAR_INTRINSIC_SIZE}
+                    decorative
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Name Field */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Lucas Brock"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6B38D4] focus:border-transparent text-sm text-gray-900"
-            />
-          </div>
-
-          {/* Relation Field */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-              Relationship
-            </label>
-            <select
-              value={relation}
-              onChange={(e) => setRelation(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#6B38D4] focus:border-transparent text-sm text-gray-900 bg-white"
-            >
-              <option value="SON">SON</option>
-              <option value="DAUGHTER">DAUGHTER</option>
-              <option value="SPOUSE">SPOUSE</option>
-              <option value="MOTHER">MOTHER</option>
-              <option value="FATHER">FATHER</option>
-              <option value="SIBLING">SIBLING</option>
-              <option value="GRANDPARENT">GRANDPARENT</option>
-            </select>
-          </div>
-
-          {/* Avatar Selection */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <ImageIcon className="w-3.5 h-3.5 text-gray-400" />
-              <span>Select Profile Avatar</span>
-            </label>
-            <div className="flex items-center gap-3 overflow-x-auto py-1">
-              {AVATAR_OPTIONS.map((imgUrl, index) => (
-                <button
-                  type="button"
-                  key={index}
-                  onClick={() => setSelectedImage(imgUrl)}
-                  className={`relative rounded-full overflow-hidden w-12 h-12 shrink-0 border-2 transition-all ${
-                    selectedImage === imgUrl
-                      ? 'border-[#6B38D4] scale-110 shadow-sm'
-                      : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  <img src={imgUrl} alt={`Avatar ${index + 1}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Submit & Cancel Buttons */}
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#6B38D4] to-[#5C24FF] text-white text-sm font-semibold shadow-md hover:opacity-95 transition-opacity"
-            >
-              Add Member
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        {/* Submit & Cancel Buttons */}
+        <div className="flex items-center gap-3 pt-2">
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!canSubmit}
+            className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold shadow-md"
+          >
+            Add Member
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
-};
+}

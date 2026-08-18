@@ -1,30 +1,39 @@
-import React from 'react';
 import { UserPlus } from 'lucide-react';
+import { cn } from '../lib/cn';
+import { Pill } from './ui/Pill';
+import { FOCUS_RING } from './ui/styles';
 
-interface AddMemberCardProps {
+export interface AddMemberCardProps {
   onAddMember: () => void;
 }
 
-export const AddMemberCard: React.FC<AddMemberCardProps> = ({ onAddMember }) => {
+export function AddMemberCard({ onAddMember }: AddMemberCardProps) {
   return (
     <button
+      type="button"
       onClick={onAddMember}
-      className="group relative flex flex-col items-center justify-between transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6B38D4] focus-visible:ring-offset-2 rounded-3xl p-1.5 opacity-90 hover:opacity-100 hover:scale-102"
       aria-label="Add new family member"
+      className={cn(
+        'group relative flex w-full max-w-[160px] cursor-pointer flex-col items-center justify-between rounded-3xl p-1.5 opacity-90 hover:scale-102 hover:opacity-100 sm:max-w-[176px]',
+        'transition-[transform,opacity] duration-300',
+        FOCUS_RING,
+      )}
     >
       {/* Dashed Purple Circle Container */}
-      <div className="relative mb-4 flex items-center justify-center p-1.5">
-        <div className="w-[120px] h-[120px] sm:w-[128px] sm:h-[128px] rounded-full bg-[#F7F2FA]/60 flex items-center justify-center border-4 border-dashed border-[#6B38D4]/30 group-hover:border-[#6B38D4]/60 transition-all duration-300 group-hover:bg-[#F7F2FA]">
-          <UserPlus className="w-8 h-8 text-[#6B38D4] stroke-[2.2] group-hover:scale-110 transition-transform duration-300" />
+      {/* No inner padding here: it would push this circle below the member
+          avatars, which sit flush in their own wrapper. */}
+      <div className="relative mb-4 flex items-center justify-center">
+        <div className="flex h-[120px] w-[120px] items-center justify-center rounded-full border-4 border-dashed border-brand/30 bg-lilac/60 transition-[background-color,border-color] duration-300 group-hover:border-brand/60 group-hover:bg-lilac sm:h-[128px] sm:w-[128px]">
+          <UserPlus className="h-8 w-8 stroke-[2.2] text-brand transition-transform duration-300 group-hover:scale-110" />
         </div>
       </div>
 
       {/* Bottom Pill Container */}
-      <div className="w-full min-w-[130px] px-4 py-2.5 rounded-full flex flex-col items-center justify-center bg-white/70 backdrop-blur-xl border border-white/50 border-dashed shadow-2xs group-hover:bg-white/90 group-hover:border-[#6B38D4]/40 transition-all duration-300">
-        <span className="font-sans font-bold text-[15px] sm:text-[16px] text-[#494551] group-hover:text-[#6B38D4] transition-colors leading-tight">
+      <Pill className="border border-dashed border-white/50 bg-white/70 shadow-2xs group-hover:border-brand/40 group-hover:bg-white/90">
+        <span className="max-w-full text-center font-sans text-[15px] leading-tight font-bold text-ink-soft transition-colors group-hover:text-brand sm:text-[16px]">
           Add Member
         </span>
-      </div>
+      </Pill>
     </button>
   );
-};
+}

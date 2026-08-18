@@ -1,27 +1,74 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Values are unchanged from the approved design; they are named
+ * here so the same colour is not re-typed as a hex literal in every component.
+ */
+@theme {
+  --color-brand: #6b38d4;
+  --color-brand-deep: #5c24ff;
+  --color-ink: #1d1b20;
+  --color-ink-soft: #494551;
+  --color-nav-ink: #232c2b;
+  --color-danger: #d22b2b;
+  --color-hairline: #cbc4d2;
+  --color-chip: #dde2e8;
+  --color-lilac: #f7f2fa;
+  --color-lilac-deep: #f4eff8;
+
+  /* Shared content width for the header and the main panel. */
+  --container-shell: 1253px;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-manrope: 'Manrope', system-ui, -apple-system, sans-serif;
+
+  --animate-fade-in: fade-in 200ms ease-out;
+  --animate-toast-in: toast-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @layer base {
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
   }
 }
 
-.font-manrope {
-  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Ambient glow effects matching the Figma spec */
-.glow-left {
-  background: radial-gradient(circle, rgba(176, 144, 242, 0.3) 0%, rgba(92, 36, 255, 0.15) 60%, rgba(255, 255, 255, 0) 100%);
-  filter: blur(90px);
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/*
+ * Ambient glow. Kept soft and low-contrast: with the enclosing panel removed the
+ * glow reads directly against the page, so it sits just above white rather than
+ * as a visible gradient behind the content.
+ */
+.glow-left,
 .glow-right {
-  background: radial-gradient(circle, rgba(176, 144, 242, 0.3) 0%, rgba(92, 36, 255, 0.15) 60%, rgba(255, 255, 255, 0) 100%);
-  filter: blur(90px);
+  background: radial-gradient(
+    circle,
+    rgba(176, 144, 242, 0.22) 0%,
+    rgba(124, 92, 233, 0.1) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(110px);
 }
 
-/* Concentric rings around selected profile avatar */
+/* Concentric rings around the selected profile avatar */
 .selected-ring-container {
   position: relative;
 }
@@ -49,5 +96,11 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selected-ring-container::before {
+    animation: none;
   }
 }

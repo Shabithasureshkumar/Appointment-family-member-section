@@ -1,68 +1,92 @@
-import React from 'react';
+import { cn } from '../lib/cn';
+import { Avatar } from './ui/Avatar';
+import { Pill } from './ui/Pill';
+import { FOCUS_RING } from './ui/styles';
 import type { FamilyMember } from '../types';
 
-interface FamilyMemberCardProps {
+export interface FamilyMemberCardProps {
   member: FamilyMember;
   isSelected: boolean;
   onSelect: (id: string) => void;
 }
 
-export const FamilyMemberCard: React.FC<FamilyMemberCardProps> = ({
-  member,
-  isSelected,
-  onSelect,
-}) => {
+const AVATAR_INTRINSIC_SIZE = 128;
+
+/**
+ * A selectable family member.
+ *
+ * Selection is exposed with `aria-pressed` rather than colour and scale alone.
+ * The cards share a grid with the "Add Member" action, which is not a selection
+ * option, so a toggle-button group is a truthful fit where a radiogroup would
+ * have to claim a non-radio child.
+ */
+export function FamilyMemberCard({ member, isSelected, onSelect }: FamilyMemberCardProps) {
   return (
     <button
+      type="button"
       onClick={() => onSelect(member.id)}
-      className={`group relative flex flex-col items-center justify-between transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6B38D4] focus-visible:ring-offset-2 rounded-3xl p-1.5 ${
-        isSelected ? 'scale-105 z-10' : 'hover:scale-102 opacity-90 hover:opacity-100'
-      }`}
-      aria-label={`Select ${member.name}, relation ${member.relation}`}
+      aria-pressed={isSelected}
+      aria-label={`${member.name}, ${member.relation}`}
+      className={cn(
+        'group relative flex w-full max-w-[160px] cursor-pointer flex-col items-center justify-between rounded-3xl p-1.5 sm:max-w-[176px]',
+        // Explicit property list: `transition-all` would also animate the focus
+        // outline, delaying the indicator.
+        'transition-[transform,opacity] duration-300',
+        FOCUS_RING,
+        isSelected ? 'z-10 scale-105' : 'opacity-90 hover:scale-102 hover:opacity-100',
+      )}
     >
       {/* Circle Image Wrapper */}
       <div className="relative mb-4 flex items-center justify-center">
-        {/* Selected Rings Effect */}
         {isSelected ? (
           <div className="selected-ring-container p-1.5">
-            <div className="w-[120px] h-[120px] sm:w-[128px] sm:h-[128px] rounded-full overflow-hidden border-[1.5px] border-[#6B38D4] shadow-md transition-transform duration-300 group-hover:scale-102">
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-full h-full object-cover"
+            <div className="h-[120px] w-[120px] overflow-hidden rounded-full border-[1.5px] border-brand shadow-md transition-transform duration-300 group-hover:scale-102 sm:h-[128px] sm:w-[128px]">
+              <Avatar
+                src={member.imageUrl}
+                name={member.name}
+                size={AVATAR_INTRINSIC_SIZE}
+                loading="eager"
+                decorative
               />
             </div>
           </div>
         ) : (
-          <div className="w-[120px] h-[120px] sm:w-[128px] sm:h-[128px] rounded-full overflow-hidden border-4 border-white shadow-[0px_2px_8px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-md">
-            <img
-              src={member.image}
-              alt={member.name}
-              className="w-full h-full object-cover"
+          <div className="h-[120px] w-[120px] overflow-hidden rounded-full border-4 border-white shadow-[0px_2px_8px_rgba(0,0,0,0.06)] transition-shadow duration-300 group-hover:shadow-md sm:h-[128px] sm:w-[128px]">
+            <Avatar
+              src={member.imageUrl}
+              name={member.name}
+              size={AVATAR_INTRINSIC_SIZE}
+              loading="eager"
+              decorative
             />
           </div>
         )}
       </div>
 
       {/* Name & Relation Bottom Pill Container */}
-      <div
-        className={`w-full min-w-[125px] px-4 py-2 rounded-full flex flex-col items-center justify-center backdrop-blur-xl transition-all duration-300 ${
+      <Pill
+        className={cn(
           isSelected
-            ? 'bg-white/90 border border-white/60 shadow-[0px_2px_12px_rgba(107,56,212,0.15)]'
-            : 'bg-white/70 border border-white/40 shadow-xs hover:bg-white/85'
-        }`}
+            ? 'border border-white/60 bg-white/90 shadow-[0px_2px_12px_rgba(107,56,212,0.15)]'
+            : 'border border-white/40 bg-white/70 shadow-xs group-hover:bg-white/85',
+        )}
       >
         <span
-          className={`font-sans text-[15px] sm:text-[16px] leading-tight text-center font-bold tracking-tight ${
-            isSelected ? 'text-[#6B38D4]' : 'text-[#1D1B20]'
-          }`}
+          title={member.name}
+          className={cn(
+            'line-clamp-2 max-w-full text-center font-sans text-[15px] leading-tight font-bold tracking-tight break-words sm:text-[16px]',
+            isSelected ? 'text-brand' : 'text-ink',
+          )}
         >
           {member.name}
         </span>
-        <span className="font-sans font-normal text-[10.5px] sm:text-[11px] text-[#494551] uppercase tracking-[0.5px] mt-0.5">
+        <span
+          title={member.relation}
+          className="mt-0.5 max-w-full truncate text-center font-sans text-[10.5px] font-normal tracking-[0.5px] text-ink-soft uppercase sm:text-[11px]"
+        >
           {member.relation}
         </span>
-      </div>
+      </Pill>
     </button>
   );
-};
+}

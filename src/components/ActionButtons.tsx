@@ -1,41 +1,57 @@
-import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { Button } from './ui/Button';
 
-interface ActionButtonsProps {
-  selectedMemberName: string;
+export interface ActionButtonsProps {
+  /** Null when nothing is selected; both actions are disabled in that case. */
+  selectedMemberName: string | null;
   onConfirm: () => void;
   onRemove: () => void;
   disableRemove?: boolean;
 }
 
-export const ActionButtons: React.FC<ActionButtonsProps> = ({
+/**
+ * The visible button copy is the approved design copy. `selectedMemberName` is
+ * folded into the accessible name so screen reader users hear which member each
+ * action applies to, and the remove confirmation dialog names them on screen.
+ */
+export function ActionButtons({
+  selectedMemberName,
   onConfirm,
   onRemove,
   disableRemove = false,
-}) => {
+}: ActionButtonsProps) {
+  const hasSelection = Boolean(selectedMemberName);
+
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-[17px] w-full max-w-[1010px] mx-auto py-2">
+    <div className="mx-auto flex w-full max-w-[940px] flex-col items-center justify-center gap-4 sm:flex-row sm:gap-[17px]">
       {/* Primary Confirm Button */}
-      <button
+      <Button
+        variant="primary"
         onClick={onConfirm}
-        className="w-full sm:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-[#6B38D4] to-[#5C24FF] text-white px-8 py-4 rounded-[17.5px] font-sans font-semibold text-[16px] sm:text-[17px] shadow-[0px_16px_32px_rgba(79,55,138,0.25)] hover:opacity-95 hover:shadow-[0px_20px_36px_rgba(79,55,138,0.35)] active:scale-[0.99] transition-all cursor-pointer border border-white/20"
+        disabled={!hasSelection}
+        aria-label={
+          hasSelection
+            ? `Confirm selected member, ${selectedMemberName}`
+            : 'Confirm selected member. Select a family member first.'
+        }
+        className="flex min-h-[60px] w-full items-center justify-center gap-3 rounded-[17.5px] px-8 font-sans text-[16px] font-semibold sm:w-auto sm:min-w-[320px] sm:text-[17px]"
       >
         <span>Confirm Selected Member</span>
-        <ArrowRight className="w-4 h-4 sm:w-[15px] sm:h-[15px] text-white stroke-[2.5]" />
-      </button>
+        <ArrowRight className="h-4 w-4 stroke-[2.5] text-white sm:h-[15px] sm:w-[15px]" />
+      </Button>
 
       {/* Secondary Remove Button */}
-      <button
+      <Button
+        variant="danger"
         onClick={onRemove}
-        disabled={disableRemove}
-        className={`w-full sm:w-auto flex items-center justify-center px-7 py-4 rounded-[17.5px] bg-white border border-[#CBC4D2] text-[#D22B2B] font-sans font-normal text-[16px] sm:text-[17px] transition-all cursor-pointer ${
-          disableRemove
-            ? 'opacity-40 cursor-not-allowed border-gray-200 text-gray-400'
-            : 'hover:bg-red-50/50 hover:border-red-300 active:scale-[0.99]'
-        }`}
+        disabled={!hasSelection || disableRemove}
+        aria-label={
+          hasSelection ? `Remove ${selectedMemberName}` : 'Remove member. Select a family member first.'
+        }
+        className="flex min-h-[60px] w-full items-center justify-center rounded-[17.5px] px-7 font-sans text-[16px] font-normal sm:w-auto sm:min-w-[195px] sm:text-[17px]"
       >
         <span>Remove Member</span>
-      </button>
+      </Button>
     </div>
   );
-};
+}

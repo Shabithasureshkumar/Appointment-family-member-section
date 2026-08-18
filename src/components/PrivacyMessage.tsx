@@ -1,15 +1,14 @@
-import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 
-export const PrivacyMessage: React.FC = () => {
+export function PrivacyMessage() {
   return (
-    <div className="flex items-center justify-center max-w-[430px] mx-auto mt-4 mb-8 px-2">
-      <div className="flex items-center justify-center gap-2.5 bg-[#F4EFF8]/70 border border-white/60 rounded-full px-5 py-2.5 shadow-2xs backdrop-blur-md">
-        <ShieldCheck className="w-4 h-4 sm:w-[17px] sm:h-[17px] text-[#6B38D4] shrink-0 fill-[#6B38D4]/15" />
-        <span className="font-sans font-normal text-[13px] sm:text-[14.27px] text-[#494551] text-center leading-tight">
-          Your family's health information is secure and private
+    <div className="mx-auto mt-8 flex max-w-[460px] items-center justify-center px-2 md:mt-10">
+      <div className="flex items-center justify-center gap-2.5 rounded-full border border-white/60 bg-lilac-deep/70 px-6 py-3 shadow-2xs backdrop-blur-md">
+        <ShieldCheck className="h-4 w-4 shrink-0 fill-brand/15 text-brand sm:h-[17px] sm:w-[17px]" />
+        <span className="text-center font-sans text-[13px] leading-tight font-normal text-ink-soft sm:text-[14.27px]">
+          Your family&apos;s health information is secure and private
         </span>
       </div>
     </div>
   );
-};
+}

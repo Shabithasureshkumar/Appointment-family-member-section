@@ -1,15 +1,17 @@
-import React from 'react';
-
-export const MedicalLogo: React.FC = () => {
+/**
+ * Hero mark. Sized to the ~128px the design calls for on desktop, stepping down
+ * on smaller viewports; the viewBox keeps the aspect ratio fixed.
+ */
+export function MedicalLogo() {
   return (
-    <div className="flex justify-center items-center py-2 transition-transform hover:scale-105 duration-300">
+    <div className="flex items-center justify-center transition-transform duration-300 hover:scale-105">
       <svg
-        width="96"
-        height="96"
+        width="128"
+        height="128"
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-20 h-20 md:w-24 md:h-24 drop-shadow-sm"
+        className="h-24 w-24 drop-shadow-sm sm:h-28 sm:w-28 md:h-32 md:w-32"
       >
         {/* Main Blue Medical Cross with Stethoscope integration */}
         <g filter="url(#glow)">
@@ -40,4 +42,4 @@ export const MedicalLogo: React.FC = () => {
       </svg>
     </div>
   );
-};
+}
