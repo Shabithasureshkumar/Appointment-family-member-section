@@ -166,7 +166,7 @@ export function AddMemberModal({ onClose, onAdd }: AddMemberModalProps) {
         </div>
 
         {/* Submit & Cancel Buttons */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-col gap-3 pt-2 min-[400px]:flex-row min-[400px]:items-center">
           <Button
             variant="secondary"
             onClick={onClose}

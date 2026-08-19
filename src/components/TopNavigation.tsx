@@ -138,16 +138,19 @@ export function TopNavigation({ activeTab, onTabChange }: TopNavigationProps) {
           <Search className="h-5 w-5 stroke-[2.2] md:h-[21px] md:w-[21px]" aria-hidden="true" />
         </Button>
 
-        <Button
-          variant="icon"
-          aria-label="Settings"
-          className={cn(
-            ICON_BUTTON_SIZE,
-            'border border-gray-100 bg-white text-gray-600 shadow-2xs hover:bg-gray-50',
-          )}
-        >
-          <Settings className="h-5 w-5 stroke-[2] md:h-[21px] md:w-[21px]" aria-hidden="true" />
-        </Button>
+        {/* Not part of the mobile composition; shown from sm up as before. */}
+        <div className="hidden sm:block">
+          <Button
+            variant="icon"
+            aria-label="Settings"
+            className={cn(
+              ICON_BUTTON_SIZE,
+              'border border-gray-100 bg-white text-gray-600 shadow-2xs hover:bg-gray-50',
+            )}
+          >
+            <Settings className="h-5 w-5 stroke-[2] md:h-[21px] md:w-[21px]" aria-hidden="true" />
+          </Button>
+        </div>
 
         <Button
           variant="icon"
@@ -171,7 +174,7 @@ export function TopNavigation({ activeTab, onTabChange }: TopNavigationProps) {
               decorative
             />
           </div>
-          <div className="hidden flex-col text-left sm:flex">
+          <div className="hidden flex-col text-left min-[360px]:flex">
             <span className="font-manrope text-[12px] leading-tight font-semibold text-nav-ink">
               {CURRENT_USER.name}
             </span>

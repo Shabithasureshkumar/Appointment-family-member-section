@@ -7,6 +7,7 @@ export type ButtonVariant =
   | 'secondary'
   | 'danger'
   | 'destructive'
+  | 'outline'
   | 'icon'
   | 'plain';
 
@@ -33,10 +34,15 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'disabled:opacity-40 disabled:cursor-not-allowed',
   ),
   danger: cn(
-    'bg-white border border-hairline text-danger',
+    'bg-red-50/60 border border-red-200 text-danger sm:bg-white sm:border-hairline',
     'enabled:cursor-pointer enabled:hover:bg-red-50/50 enabled:hover:border-red-300',
     'enabled:active:scale-[0.99]',
     'disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400',
+  ),
+  outline: cn(
+    'bg-white border border-brand text-brand',
+    'enabled:cursor-pointer enabled:hover:bg-lilac enabled:active:scale-[0.99]',
+    'disabled:opacity-40 disabled:cursor-not-allowed',
   ),
   destructive: cn(
     'bg-danger border border-transparent text-white shadow-md',

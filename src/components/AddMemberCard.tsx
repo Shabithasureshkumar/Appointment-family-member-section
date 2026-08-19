@@ -14,7 +14,10 @@ export function AddMemberCard({ onAddMember }: AddMemberCardProps) {
       onClick={onAddMember}
       aria-label="Add new family member"
       className={cn(
-        'group relative flex w-full max-w-[160px] cursor-pointer flex-col items-center justify-between rounded-3xl p-1.5 opacity-90 hover:scale-102 hover:opacity-100 sm:max-w-[176px]',
+        // Hidden below sm: on mobile the same action is offered as the
+        // "Add member" button next to Remove, per the mobile design.
+        'hidden w-full max-w-[160px] cursor-pointer flex-col items-center justify-between rounded-3xl p-1.5 opacity-90 hover:scale-102 hover:opacity-100 sm:flex sm:max-w-[176px]',
+        'group relative',
         'transition-[transform,opacity] duration-300',
         FOCUS_RING,
       )}

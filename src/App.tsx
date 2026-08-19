@@ -101,22 +101,21 @@ export function App() {
           <PageIntro />
 
           {/* 4. Family Member Cards Row */}
-          <div className="mx-auto mt-12 w-full max-w-[940px] md:mt-14">
+          <div className="mx-auto mt-10 w-full max-w-[520px] sm:mt-12 sm:max-w-[940px] md:mt-14">
             {members.length === 0 ? (
               <EmptyState onAddMember={() => setIsAddModalOpen(true)} />
             ) : (
               /*
-                auto-fit tracks rather than fixed column counts: the column count
-                follows the available width continuously, so there is no abrupt
-                jump at a breakpoint and no column ever grows far wider than the
-                card inside it. The three minimums are tuned to match the approved
-                design — 1 column at 320px, 2 from 360px, 3 from 640px, 4 in the
-                tablet range and exactly 5 from 900px up, never 6.
+                Below sm this is a single-column stack of full-width list rows,
+                per the mobile design. From sm up it returns to the approved
+                auto-fit avatar grid, whose column count follows the available
+                width continuously rather than jumping at breakpoints: 3 columns
+                from 640px, 4 from ~700px and exactly 5 from 900px up, never 6.
               */
               <div
                 role="group"
                 aria-label="Family members"
-                className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] items-start justify-items-center gap-4 sm:gap-6 lg:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] lg:gap-10"
+                className="mx-auto grid grid-cols-1 items-start justify-items-center gap-3 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:gap-6 lg:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] lg:gap-10"
               >
                 {members.map((member) => (
                   <FamilyMemberCard
@@ -133,12 +132,13 @@ export function App() {
             )}
           </div>
 
-          {/* 5. Action Buttons (Confirm / Remove) */}
-          <div className="mt-12 w-full md:mt-14">
+          {/* 5. Action Buttons (Confirm / Add / Remove) */}
+          <div className="mt-10 w-full sm:mt-12 md:mt-14">
             <ActionButtons
               selectedMemberName={selectedMember ? selectedMember.name : null}
               onConfirm={handleConfirmSelection}
               onRemove={handleRequestRemoval}
+              onAddMember={() => setIsAddModalOpen(true)}
               disableRemove={isLastMember}
             />
           </div>

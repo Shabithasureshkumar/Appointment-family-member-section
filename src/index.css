@@ -68,26 +68,33 @@
   filter: blur(110px);
 }
 
-/* Concentric rings around the selected profile avatar */
+/*
+ * Concentric rings around the selected profile avatar.
+ *
+ * Scoped to sm and up: below that the mobile list composition marks selection
+ * with the row's border and tint instead, so the rings must not paint.
+ */
 .selected-ring-container {
   position: relative;
 }
 
-.selected-ring-container::before {
-  content: '';
-  position: absolute;
-  inset: -14px;
-  border-radius: 50%;
-  border: 1.5px dashed rgba(107, 56, 212, 0.4);
-  animation: spin-slow 20s linear infinite;
-}
+@media (min-width: 40rem) {
+  .selected-ring-container::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(107, 56, 212, 0.4);
+    animation: spin-slow 20s linear infinite;
+  }
 
-.selected-ring-container::after {
-  content: '';
-  position: absolute;
-  inset: -7px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(107, 56, 212, 0.25);
+  .selected-ring-container::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(107, 56, 212, 0.25);
+  }
 }
 
 @keyframes spin-slow {
