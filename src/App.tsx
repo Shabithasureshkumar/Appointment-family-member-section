@@ -4,7 +4,6 @@ import { MedicalLogo } from './components/MedicalLogo';
 import { PageIntro } from './components/PageIntro';
 import { FamilyMemberCard } from './components/FamilyMemberCard';
 import { AddMemberCard } from './components/AddMemberCard';
-import { AddMemberModal } from './components/AddMemberModal';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { ActionButtons } from './components/ActionButtons';
 import { PrivacyMessage } from './components/PrivacyMessage';
@@ -15,15 +14,15 @@ import { Container } from './components/ui/Container';
 import { useFamilyMembers } from './hooks/useFamilyMembers';
 import { useNotification } from './hooks/useNotification';
 import { DEFAULT_NAV_TAB } from './data/navigation';
-import type { FamilyMember, NavItem, NewMemberDraft } from './types';
+import type { FamilyMember, NavItem } from './types';
 
 export function App() {
-  const { members, selectedId, selectedMember, selectMember, addMember, removeMember } =
+  const { members, selectedId, selectedMember, selectMember, removeMember } =
     useFamilyMembers();
   const { notification, notify } = useNotification();
 
   const [activeTab, setActiveTab] = useState<NavItem>(DEFAULT_NAV_TAB);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isFamilyOpen, setIsFamilyOpen] = useState(false);
   const [memberPendingRemoval, setMemberPendingRemoval] = useState<FamilyMember | null>(null);
 
   const isLastMember = members.length <= 1;
@@ -34,15 +33,6 @@ export function App() {
       `Selection confirmed! Medical assistance requested for ${selectedMember.name} (${selectedMember.relation}).`,
       'success',
     );
-  };
-
-  const handleAddMember = (draft: NewMemberDraft) => {
-    const result = addMember(draft);
-    if (result.ok) {
-      notify(`${result.member.name} added successfully!`, 'success');
-    }
-    // A failure is surfaced inside the form, which keeps the dialog open.
-    return result;
   };
 
   const handleRequestRemoval = () => {
@@ -93,10 +83,11 @@ export function App() {
         */}
         <Container
           as="main"
+          fluid={isFamilyOpen}
           className="flex flex-1 flex-col items-center py-10 md:py-14 lg:py-16"
         >
-          {activeTab === 'Family' ? (
-            <FamilyMembersPage notify={notify} />
+          {isFamilyOpen ? (
+            <FamilyMembersPage notify={notify} onExit={() => setIsFamilyOpen(false)} />
           ) : (
             <>
           {/* 2. Medical Logo */}
@@ -108,7 +99,7 @@ export function App() {
           {/* 4. Family Member Cards Row */}
           <div className="mx-auto mt-10 w-full max-w-[520px] sm:mt-12 sm:max-w-[940px] md:mt-14">
             {members.length === 0 ? (
-              <EmptyState onAddMember={() => setIsAddModalOpen(true)} />
+              <EmptyState onAddMember={() => setIsFamilyOpen(true)} />
             ) : (
               /*
                 Below sm this is a single-column stack of full-width list rows,
@@ -132,7 +123,7 @@ export function App() {
                 ))}
 
                 {/* Add Member Card */}
-                <AddMemberCard onAddMember={() => setIsAddModalOpen(true)} />
+                <AddMemberCard onAddMember={() => setIsFamilyOpen(true)} />
               </div>
             )}
           </div>
@@ -143,7 +134,7 @@ export function App() {
               selectedMemberName={selectedMember ? selectedMember.name : null}
               onConfirm={handleConfirmSelection}
               onRemove={handleRequestRemoval}
-              onAddMember={() => setIsAddModalOpen(true)}
+              onAddMember={() => setIsFamilyOpen(true)}
               disableRemove={isLastMember}
             />
           </div>
@@ -156,9 +147,6 @@ export function App() {
       </div>
 
       {/* Dialogs are mounted only while open so their state starts clean each time. */}
-      {isAddModalOpen ? (
-        <AddMemberModal onClose={() => setIsAddModalOpen(false)} onAdd={handleAddMember} />
-      ) : null}
 
       {memberPendingRemoval ? (
         <ConfirmDialog

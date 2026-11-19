@@ -51,7 +51,15 @@ function validate(v: Values): Errors {
   return errors;
 }
 
-export function InviteForm({ onBack, notify }: { onBack: () => void; notify: Notify }) {
+export function InviteForm({
+  onBack,
+  notify,
+  onChanged,
+}: {
+  onBack: () => void;
+  notify: Notify;
+  onChanged: () => void;
+}) {
   const [values, setValues] = useState<Values>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -95,6 +103,7 @@ export function InviteForm({ onBack, notify }: { onBack: () => void; notify: Not
         dateOfBirth: values.dateOfBirth,
         gender: values.gender as Gender,
       });
+      onChanged();
       notify(`Invitation sent to ${values.fullName.trim()}.`, 'success');
       setSentTo(values.fullName.trim());
     } catch (error) {

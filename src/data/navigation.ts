@@ -9,7 +9,6 @@ export const NAV_TABS: readonly NavTab[] = [
   { id: 'Dashboard', label: 'Dashboard', available: false },
   { id: 'Appointment', label: 'Appointment', available: true },
   { id: 'Patient', label: 'Patient', available: false },
-  { id: 'Family', label: 'Family', available: true },
   { id: 'Reports', label: 'Reports', available: false },
   { id: 'Chats', label: 'Chats', available: false },
   { id: 'Billing', label: 'Billing', available: false },

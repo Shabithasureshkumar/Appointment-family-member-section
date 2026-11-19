@@ -68,7 +68,7 @@ const users: MednevoUser[] = [
 ];
 
 const sentRequests = new Map<string, FamilyRequestPayload>();
-const sentInvitations = new Set<string>();
+const sentInvitations = new Map<string, InvitationPayload>();
 let incoming: IncomingRequest[] = [
   {
     id: 'req-1',
@@ -109,7 +109,7 @@ export async function sendInvitation(payload: InvitationPayload): Promise<void> 
   if (sentInvitations.has(email)) {
     throw new Error('An invitation has already been sent to this email.');
   }
-  sentInvitations.add(email);
+  sentInvitations.set(email, payload);
 }
 
 export async function listIncomingRequests(): Promise<IncomingRequest[]> {
@@ -122,4 +122,34 @@ export async function respondToRequest(id: string, _action: 'accept' | 'decline'
     throw new Error('This request is no longer available.');
   }
   incoming = incoming.filter((request) => request.id !== id);
+}
+
+export interface SentConnection {
+  id: string;
+  kind: 'request' | 'invitation';
+  name: string;
+  detail: string;
+  relationship: FamilyRelationship;
+}
+
+/** Everything the user has sent that has not been answered yet, newest first. */
+export async function listSentConnections(): Promise<SentConnection[]> {
+  const requests: SentConnection[] = [...sentRequests.values()].map((r) => {
+    const user = users.find((u) => u.id === r.userId);
+    return {
+      id: `req-${r.userId}`,
+      kind: 'request',
+      name: user?.name ?? 'MedNevo user',
+      detail: user?.email ?? '',
+      relationship: r.relationship,
+    };
+  });
+  const invitations: SentConnection[] = [...sentInvitations.values()].map((i) => ({
+    id: `inv-${i.email.toLowerCase()}`,
+    kind: 'invitation',
+    name: i.fullName,
+    detail: i.email,
+    relationship: i.relationship,
+  }));
+  return delay([...requests, ...invitations].reverse(), 0);
 }

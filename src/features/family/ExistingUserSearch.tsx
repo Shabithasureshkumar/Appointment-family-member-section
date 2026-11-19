@@ -12,7 +12,15 @@ import type { Notify } from './styles';
 const DEBOUNCE_MS = 250;
 const MESSAGE_MAX = 200;
 
-export function ExistingUserSearch({ onBack, notify }: { onBack: () => void; notify: Notify }) {
+export function ExistingUserSearch({
+  onBack,
+  notify,
+  onChanged,
+}: {
+  onBack: () => void;
+  notify: Notify;
+  onChanged: () => void;
+}) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MednevoUser[]>([]);
   const [searching, setSearching] = useState(false);
@@ -94,6 +102,7 @@ export function ExistingUserSearch({ onBack, notify }: { onBack: () => void; not
         message: message.trim() || undefined,
       });
       setSentIds((current) => new Set(current).add(selected.id));
+      onChanged();
       notify(`Family request sent to ${selected.name}.`, 'success');
       clearSelection();
     } catch (error) {
