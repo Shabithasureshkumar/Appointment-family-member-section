@@ -26,6 +26,7 @@ export type NavItem =
   | 'Dashboard'
   | 'Appointment'
   | 'Patient'
+  | 'Family'
   | 'Reports'
   | 'Chats'
   | 'Billing';

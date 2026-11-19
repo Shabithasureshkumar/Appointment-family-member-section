@@ -9,6 +9,7 @@ import { ConfirmDialog } from './components/ConfirmDialog';
 import { ActionButtons } from './components/ActionButtons';
 import { PrivacyMessage } from './components/PrivacyMessage';
 import { EmptyState } from './components/EmptyState';
+import { FamilyMembersPage } from './features/family/FamilyMembersPage';
 import { Toast } from './components/Toast';
 import { Container } from './components/ui/Container';
 import { useFamilyMembers } from './hooks/useFamilyMembers';
@@ -94,6 +95,10 @@ export function App() {
           as="main"
           className="flex flex-1 flex-col items-center py-10 md:py-14 lg:py-16"
         >
+          {activeTab === 'Family' ? (
+            <FamilyMembersPage notify={notify} />
+          ) : (
+            <>
           {/* 2. Medical Logo */}
           <MedicalLogo />
 
@@ -145,6 +150,8 @@ export function App() {
 
           {/* 6. Privacy Message */}
           <PrivacyMessage />
+            </>
+          )}
         </Container>
       </div>
 

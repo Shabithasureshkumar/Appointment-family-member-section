@@ -16,6 +16,19 @@
   --color-lilac: #f7f2fa;
   --color-lilac-deep: #f4eff8;
 
+  /* Family Members module palette. */
+  --color-fm-primary: #7c3aed;
+  --color-fm-secondary: #a855f7;
+  --color-fm-accent: #c084fc;
+  --color-fm-bg: #f5f0ff;
+  --color-fm-surface: #faf7ff;
+  --color-fm-border: #e9ddfb;
+  --color-fm-text: #1f2937;
+  --color-fm-muted: #718096;
+  --color-fm-success: #16a34a;
+  --color-fm-warning: #f59e0b;
+  --shadow-fm-card: 0 10px 30px rgba(124, 58, 237, 0.08);
+
   /* Shared content width for the header and the main panel. */
   --container-shell: 1253px;
 
